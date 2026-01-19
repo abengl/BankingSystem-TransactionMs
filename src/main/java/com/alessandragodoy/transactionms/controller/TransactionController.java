@@ -6,6 +6,7 @@ import com.alessandragodoy.transactionms.controller.dto.TransferRequestDTO;
 import com.alessandragodoy.transactionms.controller.dto.WithdrawRequestDTO;
 import com.alessandragodoy.transactionms.service.TransactionService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/transactions")
+@Tag(name = "Transaction", description = "Endpoints for managing transactions")
 public class TransactionController {
 	private final TransactionService transactionService;
 
