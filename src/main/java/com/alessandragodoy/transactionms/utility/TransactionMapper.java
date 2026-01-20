@@ -5,10 +5,11 @@ import com.alessandragodoy.transactionms.controller.dto.TransactionDTO;
 import com.alessandragodoy.transactionms.controller.dto.TransferRequestDTO;
 import com.alessandragodoy.transactionms.controller.dto.WithdrawRequestDTO;
 import com.alessandragodoy.transactionms.model.Transaction;
+import com.alessandragodoy.transactionms.model.TransactionStatus;
 import com.alessandragodoy.transactionms.model.TransactionType;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 /**
@@ -20,61 +21,56 @@ public class TransactionMapper {
 	public TransactionDTO toTransactionDTO(Transaction transaction) {
 		return Optional.ofNullable(transaction)
 				.map(t -> new TransactionDTO(
-						t.getId(),
-						t.getPrimaryAccount(),
+						t.getTransactionId(),
+						t.getAccountId() != null ? t.getAccountId().toString() : null,
 						t.getTransactionType().name(),
 						t.getAmount(),
-						formatDate(t.getDate()),
-						t.getOriginAccount(),
-						t.getDestinationAccount()
+						t.getTransactionDate() != null ? t.getTransactionDate().toString() : null,
+						t.getAccountId() != null ? t.getAccountId().toString() : null,
+						t.getRelatedAccountId() != null ? t.getRelatedAccountId().toString() : null
 				))
 				.orElse(null);
 	}
 
-	private String formatDate(Date date) {
-		return date != null ? date.toInstant().toString() : null;
-	}
-
 	public Transaction toDepositRequest(DepositRequestDTO depositRequestDTO) {
 		return Optional.ofNullable(depositRequestDTO)
-				.map(dto -> new Transaction(
-						null,
-						dto.destinationAccount(),
-						TransactionType.DEPOSIT,
-						dto.amount(),
-						new Date(),
-						"NE",
-						dto.destinationAccount()
-				))
+				.map(dto -> Transaction.builder()
+						.transactionId(null)
+						.transactionType(TransactionType.TRANSFER_OWN_ACCOUNT)
+						.accountId(Integer.parseInt(dto.destinationAccount()))
+						.relatedAccountId(null)
+						.amount(dto.amount())
+						.transactionDate(LocalDateTime.now())
+						.status(TransactionStatus.PENDING)
+						.build())
 				.orElse(null);
 	}
 
 	public Transaction toWithdrawRequest(WithdrawRequestDTO withdrawRequestDTO) {
 		return Optional.ofNullable(withdrawRequestDTO)
-				.map(dto -> new Transaction(
-						null,
-						dto.originAccount(),
-						TransactionType.WITHDRAW,
-						dto.amount(),
-						new Date(),
-						dto.originAccount(),
-						"NE"
-				))
+				.map(dto -> Transaction.builder()
+						.transactionId(null)
+						.transactionType(TransactionType.TRANSFER_OWN_ACCOUNT)
+						.accountId(Integer.parseInt(dto.originAccount()))
+						.relatedAccountId(null)
+						.amount(dto.amount())
+						.transactionDate(LocalDateTime.now())
+						.status(TransactionStatus.PENDING)
+						.build())
 				.orElse(null);
 	}
 
 	public Transaction toTransferRequest(TransferRequestDTO transferRequestDTO) {
 		return Optional.ofNullable(transferRequestDTO)
-				.map(dto -> new Transaction(
-						null,
-						dto.originAccount(),
-						TransactionType.TRANSFER,
-						dto.amount(),
-						new Date(),
-						dto.originAccount(),
-						dto.destinationAccount()
-				))
+				.map(dto -> Transaction.builder()
+						.transactionId(null)
+						.transactionType(TransactionType.TRANSFER_INTER_ACCOUNT)
+						.accountId(Integer.parseInt(dto.originAccount()))
+						.relatedAccountId(Integer.parseInt(dto.destinationAccount()))
+						.amount(dto.amount())
+						.transactionDate(LocalDateTime.now())
+						.status(TransactionStatus.PENDING)
+						.build())
 				.orElse(null);
 	}
 }
-

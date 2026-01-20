@@ -7,6 +7,7 @@ import com.alessandragodoy.transactionms.controller.dto.TransactionDTO;
 import com.alessandragodoy.transactionms.controller.dto.TransferRequestDTO;
 import com.alessandragodoy.transactionms.controller.dto.WithdrawRequestDTO;
 import com.alessandragodoy.transactionms.model.Transaction;
+import com.alessandragodoy.transactionms.model.TransactionStatus;
 import com.alessandragodoy.transactionms.model.TransactionType;
 import com.alessandragodoy.transactionms.repository.TransactionRepository;
 import com.alessandragodoy.transactionms.service.impl.TransactionServiceImpl;
@@ -22,8 +23,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static org.mockito.Mockito.verify;
@@ -44,22 +45,47 @@ class TransactionServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		transactions.add(new TransactionDTO("000001", "A000001", "DEPOSIT", 100.0, "2024-12-03T17:53:44.238Z", "NE",
-				"A000001"));
 		transactions.add(new TransactionDTO(
-				"000002", "A000001", "WITHDRAW", 100.0, "2024-11-28T17:54:09.021Z", "A000001", "NE"
+				"000001",
+				"1",
+				"TRANSFER_OWN_ACCOUNT",
+				100.0,
+				"2024-12-03T17:53:44.238",
+				null,
+				"2"
 		));
 		transactions.add(new TransactionDTO(
-				"000003", "A000001", "TRANSFER", 100.0, "2024-11-28T17:53:44.238Z", "A000001", "A000002"
+				"000002",
+				"2",
+				"TRANSFER_INTER_ACCOUNT",
+				200.0,
+				"2024-11-28T17:54:09.021",
+				"2",
+				"3"
+		));
+		transactions.add(new TransactionDTO(
+				"000003",
+				"3",
+				"TRANSFER_OWN_ACCOUNT",
+				300.0,
+				"2024-11-28T17:53:44.238",
+				"3",
+				"1"
 		));
 	}
 
 	@Test
 	@DisplayName("Test listAllTransactions - Success operation")
 	void listAllTransactions_Success() {
-		Transaction transaction =
-				Transaction.builder().id("000004").primaryAccount("A000001").transactionType(TransactionType.DEPOSIT)
-						.amount(100.0).date(new Date()).originAccount("NE").destinationAccount("A000001").build();
+		Transaction transaction = Transaction.builder()
+				.transactionId("000004")
+				.transactionType(TransactionType.TRANSFER_OWN_ACCOUNT)
+				.accountId(1)
+				.relatedAccountId(2)
+				.amount(100.0)
+				.transactionDate(LocalDateTime.now())
+				.status(TransactionStatus.COMPLETED)
+				.build();
 
 		when(transactionRepository.findAll()).thenReturn(Flux.just(transaction));
 		when(transactionMapper.toTransactionDTO(transaction)).thenReturn(transactions.get(0));
@@ -75,81 +101,106 @@ class TransactionServiceTest {
 	@Test
 	@DisplayName("Test registerDeposit - Success operation")
 	void registerDeposit_Success() {
-		DepositRequestDTO depositRequest = new DepositRequestDTO("A000001", 100.0);
-		Transaction transaction =
-				Transaction.builder().id("000001").primaryAccount("A000001").transactionType(TransactionType.DEPOSIT)
-						.amount(100.0).date(new Date()).originAccount("NE").destinationAccount("A000001").build();
+		DepositRequestDTO depositRequest = new DepositRequestDTO("1", 100.0);
+		Transaction transaction = Transaction.builder()
+				.transactionId("000001")
+				.transactionType(TransactionType.TRANSFER_OWN_ACCOUNT)
+				.accountId(1)
+				.relatedAccountId(null)
+				.amount(100.0)
+				.transactionDate(LocalDateTime.now())
+				.status(TransactionStatus.COMPLETED)
+				.build();
 
-		when(transactionAdapter.verifyAccountNumber(depositRequest.destinationAccount())).thenReturn(Mono.just(true));
+		when(transactionAdapter.verifyAccountNumber(
+				depositRequest.destinationAccount())).thenReturn(Mono.just(true));
 		when(transactionMapper.toDepositRequest(depositRequest)).thenReturn(transaction);
 		when(transactionRepository.save(transaction)).thenReturn(Mono.just(transaction));
-		when(transactionAdapter.updateAccountBalance("A000001", 100.0)).thenReturn(Mono.empty());
+		when(transactionAdapter.updateAccountBalance("1", 100.0)).thenReturn(Mono.empty());
 		when(transactionMapper.toTransactionDTO(transaction)).thenReturn(transactions.get(0));
 
 		StepVerifier.create(transactionService.registerDeposit(depositRequest))
 				.expectNext(transactions.get(0))
 				.verifyComplete();
 
-		verify(transactionAdapter).verifyAccountNumber("A000001");
+		verify(transactionAdapter).verifyAccountNumber("1");
 		verify(transactionRepository).save(transaction);
-		verify(transactionAdapter).updateAccountBalance("A000001", 100.0);
+		verify(transactionAdapter).updateAccountBalance("1", 100.0);
 		verify(transactionMapper).toTransactionDTO(transaction);
 	}
 
 	@Test
 	@DisplayName("Test registerWithdraw - Success operation")
 	void registerWithdraw_Success() {
-		WithdrawRequestDTO withdrawRequest = new WithdrawRequestDTO("A000001", 100.0);
-		Transaction transaction =
-				Transaction.builder().id("000002").primaryAccount("A000001").transactionType(TransactionType.WITHDRAW)
-						.amount(100.0).date(new Date()).originAccount("A000001").destinationAccount("NE").build();
+		WithdrawRequestDTO withdrawRequest = new WithdrawRequestDTO("1", 100.0);
+		Transaction transaction = Transaction.builder()
+				.transactionId("000002")
+				.transactionType(TransactionType.TRANSFER_INTER_ACCOUNT)
+				.accountId(1)
+				.relatedAccountId(null)
+				.amount(100.0)
+				.transactionDate(LocalDateTime.now())
+				.status(TransactionStatus.COMPLETED)
+				.build();
 
-		when(transactionAdapter.verifyAccountNumber(withdrawRequest.originAccount())).thenReturn(Mono.just(true));
-		when(transactionAdapter.getAccountBalance(withdrawRequest.originAccount())).thenReturn(Mono.just(1000.0));
+		when(transactionAdapter.verifyAccountNumber(withdrawRequest.originAccount())).thenReturn(
+				Mono.just(true));
+		when(transactionAdapter.getAccountBalance(withdrawRequest.originAccount())).thenReturn(
+				Mono.just(1000.0));
 		when(transactionMapper.toWithdrawRequest(withdrawRequest)).thenReturn(transaction);
 		when(transactionRepository.save(transaction)).thenReturn(Mono.just(transaction));
-		when(transactionAdapter.updateAccountBalance("A000001", -100.0)).thenReturn(Mono.empty());
+		when(transactionAdapter.updateAccountBalance("1", -100.0)).thenReturn(Mono.empty());
 		when(transactionMapper.toTransactionDTO(transaction)).thenReturn(transactions.get(1));
 
 		StepVerifier.create(transactionService.registerWithdraw(withdrawRequest))
 				.expectNext(transactions.get(1))
 				.verifyComplete();
 
-		verify(transactionAdapter).verifyAccountNumber("A000001");
+		verify(transactionAdapter).verifyAccountNumber("1");
+		verify(transactionAdapter).getAccountBalance("1");
 		verify(transactionRepository).save(transaction);
-		verify(transactionAdapter).updateAccountBalance("A000001", -100.0);
+		verify(transactionAdapter).updateAccountBalance("1", -100.0);
+		verify(transactionMapper).toWithdrawRequest(withdrawRequest);
 		verify(transactionMapper).toTransactionDTO(transaction);
 	}
 
 	@Test
 	@DisplayName("Test registerTransfer - Success operation")
 	void registerTransfer_Success() {
-		TransferRequestDTO transferRequest = new TransferRequestDTO("A000001", "A000002", 100.0);
-		Transaction transaction =
-				Transaction.builder().id("000003").primaryAccount("A000001").transactionType(TransactionType.TRANSFER)
-						.amount(100.0).date(new Date()).originAccount("A000001").destinationAccount("A000002").build();
+		TransferRequestDTO transferRequest = new TransferRequestDTO("1", "2", 100.0);
+		Transaction transaction = Transaction.builder()
+				.transactionId("000003")
+				.transactionType(TransactionType.TRANSFER_INTER_ACCOUNT)
+				.accountId(1)
+				.relatedAccountId(2)
+				.amount(100.0)
+				.transactionDate(LocalDateTime.now())
+				.status(TransactionStatus.COMPLETED)
+				.build();
 
-		when(transactionAdapter.verifyAccountNumber(transferRequest.originAccount())).thenReturn(Mono.just(true));
-		when(transactionAdapter.verifyAccountNumber(transferRequest.destinationAccount())).thenReturn(Mono.just(true));
-
-		when(transactionAdapter.getAccountBalance(transferRequest.originAccount())).thenReturn(Mono.just(1000.0));
+		when(transactionAdapter.verifyAccountNumber(transferRequest.originAccount())).thenReturn(
+				Mono.just(true));
+		when(transactionAdapter.verifyAccountNumber(
+				transferRequest.destinationAccount())).thenReturn(Mono.just(true));
+		when(transactionAdapter.getAccountBalance(transferRequest.originAccount())).thenReturn(
+				Mono.just(1000.0));
 		when(transactionMapper.toTransferRequest(transferRequest)).thenReturn(transaction);
 		when(transactionRepository.save(transaction)).thenReturn(Mono.just(transaction));
-
-		when(transactionAdapter.updateAccountBalance("A000001", -100.0)).thenReturn(Mono.empty());
-		when(transactionAdapter.updateAccountBalance("A000002", 100.0)).thenReturn(Mono.empty());
-
+		when(transactionAdapter.updateAccountBalance("1", -100.0)).thenReturn(Mono.empty());
+		when(transactionAdapter.updateAccountBalance("2", 100.0)).thenReturn(Mono.empty());
 		when(transactionMapper.toTransactionDTO(transaction)).thenReturn(transactions.get(2));
 
 		StepVerifier.create(transactionService.registerTransfer(transferRequest))
 				.expectNext(transactions.get(2))
 				.verifyComplete();
 
-		verify(transactionAdapter).verifyAccountNumber("A000001");
-		verify(transactionAdapter).verifyAccountNumber("A000002");
+		verify(transactionAdapter).verifyAccountNumber("1");
+		verify(transactionAdapter).verifyAccountNumber("2");
+		verify(transactionAdapter).getAccountBalance("1");
 		verify(transactionRepository).save(transaction);
-		verify(transactionAdapter).updateAccountBalance("A000001", -100.0);
-		verify(transactionAdapter).updateAccountBalance("A000002", 100.0);
+		verify(transactionAdapter).updateAccountBalance("1", -100.0);
+		verify(transactionAdapter).updateAccountBalance("2", 100.0);
+		verify(transactionMapper).toTransferRequest(transferRequest);
 		verify(transactionMapper).toTransactionDTO(transaction);
 	}
 
