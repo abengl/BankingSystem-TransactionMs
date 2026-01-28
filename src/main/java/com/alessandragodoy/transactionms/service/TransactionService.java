@@ -1,9 +1,7 @@
 package com.alessandragodoy.transactionms.service;
 
-import com.alessandragodoy.transactionms.controller.dto.DepositRequestDTO;
-import com.alessandragodoy.transactionms.controller.dto.TransactionDTO;
 import com.alessandragodoy.transactionms.controller.dto.TransferRequestDTO;
-import com.alessandragodoy.transactionms.controller.dto.WithdrawRequestDTO;
+import com.alessandragodoy.transactionms.model.Transaction;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -11,34 +9,36 @@ import reactor.core.publisher.Mono;
  * Service interface for managing transactions in the banking system.
  */
 public interface TransactionService {
+
 	/**
 	 * Lists all transactions.
 	 *
-	 * @return a Flux of TransactionDTO representing all transactions.
+	 * @return {@code Flux<Transaction>} representing all transactions.
 	 */
-	Flux<TransactionDTO> listAllTransactions();
+	Flux<Transaction> getAllTransactions();
 
 	/**
-	 * Registers a deposit transaction.
+	 * Retrieves a transaction by its ID.
 	 *
-	 * @param deposit the deposit request data transfer object.
-	 * @return a Mono of TransactionDTO representing the registered deposit transaction.
+	 * @param transactionId the ID of the transaction to retrieve.
+	 * @return {@code Mono<Transaction>} representing the retrieved transaction.
 	 */
-	Mono<TransactionDTO> registerDeposit(DepositRequestDTO deposit);
+	Mono<Transaction> getTransactionById(String transactionId);
 
 	/**
-	 * Registers a withdrawal transaction.
+	 * Lists all transactions for a specific account ID.
 	 *
-	 * @param withdraw the withdrawal request data transfer object.
-	 * @return a Mono of TransactionDTO representing the registered withdrawal transaction.
+	 * @param accountId the account ID to filter transactions.
+	 * @return {@code Flux<Transaction>} representing the transactions for the specified account
+	 * ID.
 	 */
-	Mono<TransactionDTO> registerWithdraw(WithdrawRequestDTO withdraw);
+	Flux<Transaction> getTransactionsByAccountId(Integer accountId);
 
 	/**
 	 * Registers a transfer transaction.
 	 *
 	 * @param transfer the transfer request data transfer object.
-	 * @return a Mono of TransactionDTO representing the registered transfer transaction.
+	 * @return {@code Mono<Transaction>} representing the registered transfer transaction.
 	 */
-	Mono<TransactionDTO> registerTransfer(TransferRequestDTO transfer);
+	Mono<Transaction> registerTransfer(TransferRequestDTO transfer);
 }
