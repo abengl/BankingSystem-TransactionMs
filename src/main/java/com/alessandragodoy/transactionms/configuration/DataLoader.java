@@ -36,7 +36,8 @@ public class DataLoader implements CommandLineRunner {
 										.build(),
 								Transaction.builder()
 										.transactionId(null)
-										.transactionType(TransactionType.TRANSFER_INTER_ACCOUNT)
+										.transactionType(
+												TransactionType.TRANSFER_THIRD_PARTY_ACCOUNT)
 										.accountId(3)
 										.relatedAccountId(4)
 										.amount(200.0)

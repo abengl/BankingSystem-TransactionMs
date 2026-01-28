@@ -169,7 +169,7 @@ components:
           description: Transfer amount
           example: 100.00
       required:
-        - sourceAccount
+        - sourceAccountId
         - targetAccount
         - amount
 

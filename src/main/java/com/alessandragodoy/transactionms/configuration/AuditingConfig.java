@@ -8,5 +8,4 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
 @EnableReactiveMongoRepositories(basePackages = "com.alessandragodoy.transactionms.repository")
 @EnableReactiveMongoAuditing
 public class AuditingConfig {
-
 }

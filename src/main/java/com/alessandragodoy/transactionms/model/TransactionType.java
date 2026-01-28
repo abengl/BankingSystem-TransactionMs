@@ -5,5 +5,5 @@ package com.alessandragodoy.transactionms.model;
  */
 public enum TransactionType {
 	TRANSFER_OWN_ACCOUNT,      // Transfer between customer accounts in the same bank
-	TRANSFER_INTER_ACCOUNT     // Transfer from the customer account to a different bank
+	TRANSFER_THIRD_PARTY_ACCOUNT     // Transfer to a third party account in the same bank
 }
