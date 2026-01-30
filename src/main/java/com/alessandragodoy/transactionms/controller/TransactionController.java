@@ -30,9 +30,7 @@ public class TransactionController {
 	 *
 	 * @return {@code ResponseEntity<Flux<TransactionDTO>>} a transactions list
 	 */
-	@Operation(summary = "Retrieve transactions history", description = "Returns the transaction" +
-			" " +
-			"history as a list of transactions.")
+	@Operation(summary = "Retrieve all transactions", description = "Returns the list of transactions.")
 	@GetMapping
 	public Mono<ResponseEntity<Flux<TransactionDTO>>> getAllTransactions() {
 

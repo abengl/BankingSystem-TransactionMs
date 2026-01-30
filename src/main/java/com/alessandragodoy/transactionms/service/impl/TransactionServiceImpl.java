@@ -6,6 +6,7 @@ import com.alessandragodoy.transactionms.exception.TransactionNotFoundException;
 import com.alessandragodoy.transactionms.exception.TransferFailedException;
 import com.alessandragodoy.transactionms.model.Transaction;
 import com.alessandragodoy.transactionms.model.TransactionStatus;
+import com.alessandragodoy.transactionms.model.TransactionType;
 import com.alessandragodoy.transactionms.repository.TransactionRepository;
 import com.alessandragodoy.transactionms.service.TransactionService;
 import lombok.RequiredArgsConstructor;
@@ -52,7 +53,7 @@ public class TransactionServiceImpl implements TransactionService {
 	public Mono<Transaction> registerTransfer(TransferRequestDTO transfer) {
 
 		Transaction transaction = Transaction.builder()
-				.transactionType(transfer.getTransactionType())
+				.transactionType(TransactionType.valueOf(transfer.getTransactionType()))
 				.accountId(transfer.getSourceAccountId())
 				.relatedAccountId(transfer.getDestinationAccountId())
 				.amount(transfer.getAmount())

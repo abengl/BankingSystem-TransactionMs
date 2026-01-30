@@ -1,6 +1,5 @@
 package com.alessandragodoy.transactionms.controller.dto;
 
-import com.alessandragodoy.transactionms.model.TransactionType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -19,11 +18,11 @@ public class TransferRequestDTO {
 
 
 	@NotNull()
-	@Pattern(regexp = "^(TRANSFER_OWN_ACCOUNT|TRANSFER_THIRD_PARTY_ACCOUNT)$", message =
-			"Transaction type must be either " +
-					"'TRANSFER_OWN_ACCOUNT' or 'TRANSFER_THIRD_PARTY_ACCOUNT'")
+	@Pattern(regexp = "TRANSFER_OWN_ACCOUNT|TRANSFER_THIRD_PARTY_ACCOUNT",
+			message = "Invalid transaction type. Allowed values are: " +
+					"TRANSFER_OWN_ACCOUNT or TRANSFER_THIRD_PARTY_ACCOUNT")
 	@Schema(description = "Type of the transaction", example = "TRANSFER_OWN_ACCOUNT")
-	TransactionType transactionType;
+	String transactionType;
 
 	@NotNull()
 	@Positive()
