@@ -10,7 +10,7 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.alessandragodoy</groupId>
+    <groupId>com.bankingsystem</groupId>
     <artifactId>transaction-ms</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>transactionms</name>
@@ -93,6 +93,12 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <version>3.7.13</version>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 
@@ -167,13 +173,11 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.12</version>
                 <executions>
-                    <!-- Attach the JaCoCo agent -->
                     <execution>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
                     </execution>
-                    <!-- Generate the coverage report -->
                     <execution>
                         <id>report</id>
                         <phase>test</phase>
@@ -181,33 +185,57 @@
                             <goal>report</goal>
                         </goals>
                         <configuration>
+                            <title>${project.artifactId}</title>
                             <excludes>
-                                <exclude>**/configuration/*</exclude>
-                                <exclude>**/api/*</exclude>
-                                <exclude>**/exception/*</exclude>
-                                <exclude>**/utility/*</exclude>
-                                <exclude>**/adapter/**</exclude>
-                                <exclude>**/model/*</exclude>
-                                <exclude>**/TransactionMsApplication.class</exclude>
+                                <exclude>**/transactionms/configuration/**</exclude>
+                                <exclude>**/transactionms/exception/**</exclude>
+                                <exclude>**/transactionms/utility/**</exclude>
+                                <exclude>**/transactionms/adapter/**</exclude>
+                                <exclude>**/transactionms/model/**</exclude>
+                                <exclude>**/transactionms/controller/dto/**
+                                </exclude>
+                                <exclude>**/transactionms/api/**</exclude>
+                                <exclude>**/transactionms/model/**</exclude>
+                                <exclude>**/transactionms/TransactionMsApplication*</exclude>
                             </excludes>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>jacoco-check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>CLASS</element>
+                                    <excludes>
+                                        <exclude>*Api*</exclude>
+                                        <exclude>*DTO*</exclude>
+                                        <exclude>*Exception*</exclude>
+                                        <exclude>*Config*</exclude>
+                                        <exclude>*Mapper*</exclude>
+                                        <exclude>*DataLoader*</exclude>
+                                        <exclude>*Client*</exclude>
+                                        <exclude>*MsApplication*</exclude>
+                                    </excludes>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.70</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>INSTRUCTION</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.70</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
                 </executions>
-                <configuration>
-                    <!-- Coverage rules -->
-                    <rules>
-                        <rule>
-                            <element>BUNDLE</element>
-                            <limits>
-                                <limit>
-                                    <counter>INSTRUCTION</counter>
-                                    <value>COVEREDRATIO</value>
-                                    <minimum>0.70</minimum>
-                                </limit>
-                            </limits>
-                        </rule>
-                    </rules>
-                </configuration>
             </plugin>
         </plugins>
     </build>
