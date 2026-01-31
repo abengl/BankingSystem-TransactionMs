@@ -12,7 +12,7 @@
 
     <groupId>com.bankingsystem</groupId>
     <artifactId>transaction-ms</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.2.0</version>
     <name>transactionms</name>
     <description>transactionms</description>
 
