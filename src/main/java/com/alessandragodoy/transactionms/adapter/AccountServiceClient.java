@@ -1,7 +1,7 @@
 package com.alessandragodoy.transactionms.adapter;
 
-import com.alessandragodoy.transactionms.controller.dto.TransferRequestDTO;
-import com.alessandragodoy.transactionms.controller.dto.TransferResponseDTO;
+import com.alessandragodoy.transactionms.dto.TransferRequestDTO;
+import com.alessandragodoy.transactionms.dto.TransferResponseDTO;
 import com.alessandragodoy.transactionms.exception.ExternalServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

@@ -124,23 +124,32 @@
                 <version>7.17.0</version>
                 <executions>
                     <execution>
+                        <id>generate-transaction-api</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/openapi.yml</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi/transaction-api.yml</inputSpec>
                             <generatorName>spring</generatorName>
                             <apiPackage>com.alessandragodoy.transactionms.api</apiPackage>
-                            <modelPackage>com.alessandragodoy.transactionms.model</modelPackage>
-                            <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
+                            <modelPackage>com.alessandragodoy.transactionms.dto</modelPackage>
                             <configOptions>
-                                <delegatePattern>true</delegatePattern>
+                                <delegatePattern>false</delegatePattern>
                                 <useSpringBoot3>true</useSpringBoot3>
                                 <interfaceOnly>true</interfaceOnly>
                                 <skipDefaultInterface>true</skipDefaultInterface>
                                 <useJakartaEe>true</useJakartaEe>
+                                <useBeanValidation>false</useBeanValidation>
+                                <useTags>true</useTags>
                                 <reactive>true</reactive>
                             </configOptions>
+                            <generateModels>false</generateModels>
+                            <generateApis>true</generateApis>
+                            <generateModelTests>false</generateModelTests>
+                            <generateApiTests>false</generateApiTests>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <generateModelDocumentation>false</generateModelDocumentation>
+                            <generateApiDocumentation>false</generateApiDocumentation>
                         </configuration>
                     </execution>
                 </executions>

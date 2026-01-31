@@ -1,6 +1,6 @@
 package com.alessandragodoy.transactionms.service;
 
-import com.alessandragodoy.transactionms.controller.dto.TransferRequestDTO;
+import com.alessandragodoy.transactionms.dto.TransferRequestDTO;
 import com.alessandragodoy.transactionms.model.Transaction;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

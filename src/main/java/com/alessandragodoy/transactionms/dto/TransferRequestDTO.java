@@ -1,4 +1,4 @@
-package com.alessandragodoy.transactionms.controller.dto;
+package com.alessandragodoy.transactionms.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TransferRequestDTO {
-
 
 	@NotNull()
 	@Pattern(regexp = "TRANSFER_OWN_ACCOUNT|TRANSFER_THIRD_PARTY_ACCOUNT",

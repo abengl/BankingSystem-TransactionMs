@@ -1,7 +1,7 @@
 package com.alessandragodoy.transactionms.controller;
 
-import com.alessandragodoy.transactionms.controller.dto.TransactionDTO;
-import com.alessandragodoy.transactionms.controller.dto.TransferRequestDTO;
+import com.alessandragodoy.transactionms.dto.TransactionDTO;
+import com.alessandragodoy.transactionms.dto.TransferRequestDTO;
 import com.alessandragodoy.transactionms.exception.TransactionNotFoundException;
 import com.alessandragodoy.transactionms.model.Transaction;
 import com.alessandragodoy.transactionms.model.TransactionStatus;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
  * Tests reactive REST endpoints for transaction management operations.
  */
 @WebFluxTest(TransactionController.class)
-class TransactionControllerTests {
+class TransactionControllerTest {
 
 	@Autowired
 	private WebTestClient webTestClient;

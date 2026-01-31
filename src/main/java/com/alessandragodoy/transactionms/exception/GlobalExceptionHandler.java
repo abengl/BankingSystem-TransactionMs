@@ -1,5 +1,6 @@
 package com.alessandragodoy.transactionms.exception;
 
+import com.alessandragodoy.transactionms.dto.CustomErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

@@ -1,4 +1,4 @@
-package com.alessandragodoy.transactionms.controller.dto;
+package com.alessandragodoy.transactionms.dto;
 
 import com.alessandragodoy.transactionms.model.TransactionStatus;
 import com.alessandragodoy.transactionms.model.TransactionType;

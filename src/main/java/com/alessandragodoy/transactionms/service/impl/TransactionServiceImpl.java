@@ -1,7 +1,7 @@
 package com.alessandragodoy.transactionms.service.impl;
 
 import com.alessandragodoy.transactionms.adapter.AccountServiceClient;
-import com.alessandragodoy.transactionms.controller.dto.TransferRequestDTO;
+import com.alessandragodoy.transactionms.dto.TransferRequestDTO;
 import com.alessandragodoy.transactionms.exception.TransactionNotFoundException;
 import com.alessandragodoy.transactionms.exception.TransferFailedException;
 import com.alessandragodoy.transactionms.model.Transaction;

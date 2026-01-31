@@ -1,15 +1,17 @@
 package com.alessandragodoy.transactionms.controller;
 
-import com.alessandragodoy.transactionms.controller.dto.TransactionDTO;
-import com.alessandragodoy.transactionms.controller.dto.TransferRequestDTO;
+import com.alessandragodoy.transactionms.api.TransactionApi;
+import com.alessandragodoy.transactionms.dto.TransactionDTO;
+import com.alessandragodoy.transactionms.dto.TransferRequestDTO;
 import com.alessandragodoy.transactionms.service.TransactionService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -20,19 +22,17 @@ import static com.alessandragodoy.transactionms.utility.DTOMapper.convertToDTO;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/transactions")
-@Tag(name = "Transaction", description = "Endpoints for managing transactions")
-public class TransactionController {
+public class TransactionController implements TransactionApi {
 	private final TransactionService transactionService;
 
 	/**
 	 * Retrieves all transactions registered.
 	 *
+	 * @param exchange the server web exchange
 	 * @return {@code ResponseEntity<Flux<TransactionDTO>>} a transactions list
 	 */
-	@Operation(summary = "Retrieve all transactions", description = "Returns the list of transactions.")
-	@GetMapping
-	public Mono<ResponseEntity<Flux<TransactionDTO>>> getAllTransactions() {
+	public Mono<ResponseEntity<Flux<TransactionDTO>>> getAllTransactions(
+			ServerWebExchange exchange) {
 
 		return transactionService.getAllTransactions()
 				.map(transaction -> convertToDTO(transaction, TransactionDTO.class))
@@ -44,13 +44,11 @@ public class TransactionController {
 	 * Retrieves a transaction by its ID.
 	 *
 	 * @param transactionId the unique identifier of the transaction
+	 * @param exchange      the server web exchange
 	 * @return {@code ResponseEntity<TransactionDTO>} the transaction details
 	 */
-	@Operation(summary = "Retrieve a transaction by ID", description = "Returns the details of " +
-			"a specific transaction by its unique identifier.")
-	@GetMapping("/{transactionId}")
 	public Mono<ResponseEntity<TransactionDTO>> getTransactionById(
-			@PathVariable String transactionId) {
+			@PathVariable String transactionId, ServerWebExchange exchange) {
 
 		return transactionService.getTransactionById(transactionId)
 				.map(transaction -> ResponseEntity.ok(
@@ -61,13 +59,11 @@ public class TransactionController {
 	 * Retrieves transactions by account ID.
 	 *
 	 * @param accountId the unique identifier of the account
+	 * @param exchange  the server web exchange
 	 * @return {@code ResponseEntity<Flux<TransactionDTO>>} a list of transactions for the account
 	 */
-	@Operation(summary = "Retrieve transactions by account ID", description = "Returns a list " +
-			"of transactions associated with a specific account ID.")
-	@GetMapping("/account/{accountId}")
 	public Mono<ResponseEntity<Flux<TransactionDTO>>> getTransactionsByAccountId(
-			@PathVariable Integer accountId) {
+			@PathVariable Integer accountId, ServerWebExchange exchange) {
 
 		return transactionService.getTransactionsByAccountId(accountId)
 				.map(transaction -> convertToDTO(transaction, TransactionDTO.class))
@@ -78,20 +74,19 @@ public class TransactionController {
 	/**
 	 * Registers a transfer transaction.
 	 *
-	 * @param transferRequest the transfer request data transfer object
+	 * @param transferRequestDTO the transfer request data transfer object
+	 * @param exchange           the server web exchange
 	 * @return {@code ResponseEntity<TransactionDTO>} containing the TransactionDTO
 	 */
-	@Operation(summary = "Register a transfer transaction", description = "Returns the " +
-			"transaction" +
-			" details after registering a transfer.")
-	@PostMapping("/transfer")
 	public Mono<ResponseEntity<TransactionDTO>> registerTransfer(
-			@Valid @RequestBody TransferRequestDTO transferRequest) {
+			@Valid @RequestBody Mono<TransferRequestDTO> transferRequestDTO,
+			ServerWebExchange exchange) {
 
-		return transactionService.registerTransfer(transferRequest)
-				.map(transaction -> ResponseEntity
-						.status(HttpStatus.CREATED).body(
-								convertToDTO(transaction, TransactionDTO.class)));
+		return transferRequestDTO
+				.flatMap(request -> transactionService.registerTransfer(request)
+						.map(transaction -> ResponseEntity
+								.status(HttpStatus.CREATED)
+								.body(convertToDTO(transaction, TransactionDTO.class))));
 	}
 
 }
