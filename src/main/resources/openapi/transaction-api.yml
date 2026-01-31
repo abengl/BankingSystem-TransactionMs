@@ -1,0 +1,373 @@
+openapi: 3.0.1
+info:
+  title: Banking System - Transaction Microservice API
+  description: |
+    Reactive API for managing banking transactions.
+    
+    This API provides endpoints for:
+    - Retrieving transaction history
+    - Getting transaction details
+    - Registering transfer transactions
+    - Querying transactions by account
+    
+    **Note**: This is a reactive API using WebFlux (Mono/Flux patterns)
+  contact:
+    name: Alessandra Godoy
+    email: api@alessandragodoy.com
+  version: 1.2.0
+servers:
+  - url: https://api.banking-system.com
+    description: Production server
+  - url: http://localhost:8087
+    description: Local development server
+tags:
+  - name: Transaction
+    description: Endpoints for managing transactions
+
+paths:
+  /api/v1/transactions:
+    get:
+      tags:
+        - Transaction
+      summary: Retrieve all transactions
+      description: Returns the complete list of all transactions in the system
+      operationId: getAllTransactions
+      responses:
+        '200':
+          description: Successfully retrieved list of transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransactionDTO'
+              examples:
+                transactionList:
+                  summary: Example transaction list
+                  value:
+                    - transactionId: "6971004f05c9a61e36766dfa"
+                      transactionType: "TRANSFER_OWN_ACCOUNT"
+                      accountId: 1
+                      relatedAccountId: 2
+                      amount: 100.0
+                      transactionStatus: "COMPLETED"
+                    - transactionId: "6971004f05c9a61e36766dfb"
+                      transactionType: "TRANSFER_THIRD_PARTY_ACCOUNT"
+                      accountId: 1
+                      relatedAccountId: 3
+                      amount: 50.0
+                      transactionStatus: "COMPLETED"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomErrorResponse'
+              examples:
+                serverError:
+                  summary: Server error example
+                  value:
+                    timestamp: "2026-01-30T10:15:30"
+                    message: "Error retrieving transactions"
+                    path: "/api/v1/transactions"
+  /api/v1/transactions/{transactionId}:
+    get:
+      tags:
+        - Transaction
+      summary: Retrieve a transaction by ID
+      description: Returns the details of a specific transaction by its unique identifier
+      operationId: getTransactionById
+      parameters:
+        - name: transactionId
+          in: path
+          required: true
+          description: The unique identifier of the transaction (MongoDB ObjectId)
+          schema:
+            type: string
+            pattern: '^[a-f0-9]{24}$'
+          example: "6971004f05c9a61e36766dfa"
+      responses:
+        '200':
+          description: Transaction found successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionDTO'
+              examples:
+                transactionDetails:
+                  summary: Transaction details
+                  value:
+                    transactionId: "6971004f05c9a61e36766dfa"
+                    transactionType: "TRANSFER_OWN_ACCOUNT"
+                    accountId: 1
+                    relatedAccountId: 2
+                    amount: 100.0
+                    transactionStatus: "COMPLETED"
+        '404':
+          description: Transaction not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomErrorResponse'
+              examples:
+                notFound:
+                  summary: Transaction not found
+                  value:
+                    timestamp: "2026-01-30T10:15:30"
+                    message: "Transaction not found with id: 6971004f05c9a61e36766dfa"
+                    path: "/api/v1/transactions/6971004f05c9a61e36766dfa"
+  /api/v1/transactions/account/{accountId}:
+    get:
+      tags:
+        - Transaction
+      summary: Retrieve transactions by account ID
+      description: Returns a list of all transactions associated with a specific account
+      operationId: getTransactionsByAccountId
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: The unique identifier of the account
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+          example: 1
+      responses:
+        '200':
+          description: Successfully retrieved account transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransactionDTO'
+              examples:
+                accountTransactions:
+                  summary: Account transaction history
+                  value:
+                    - transactionId: "6971004f05c9a61e36766dfa"
+                      transactionType: "TRANSFER_OWN_ACCOUNT"
+                      accountId: 1
+                      relatedAccountId: 2
+                      amount: 100.0
+                      transactionStatus: "COMPLETED"
+                    - transactionId: "6971004f05c9a61e36766dfb"
+                      transactionType: "TRANSFER_THIRD_PARTY_ACCOUNT"
+                      accountId: 1
+                      relatedAccountId: 3
+                      amount: 50.0
+                      transactionStatus: "COMPLETED"
+        '404':
+          description: No transactions found for account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomErrorResponse'
+              examples:
+                noTransactions:
+                  summary: No transactions found
+                  value:
+                    timestamp: "2026-01-30T10:15:30"
+                    message: "No transactions found for account id: 999"
+                    path: "/api/v1/transactions/account/999"
+  /api/v1/transactions/transfer:
+    post:
+      tags:
+        - Transaction
+      summary: Register a transfer transaction
+      description: |
+        Creates and processes a transfer transaction between two accounts.
+        
+        **Transaction Types**:
+        - TRANSFER_OWN_ACCOUNT: Transfer between accounts owned by the same customer
+        - TRANSFER_THIRD_PARTY_ACCOUNT: Transfer to an account owned by a different customer
+        
+        **Process**:
+        1. Validates source and destination accounts
+        2. Checks sufficient balance in source account
+        3. Executes the transfer via Account microservice
+        4. Records the transaction
+      operationId: registerTransfer
+      requestBody:
+        required: true
+        description: Transfer request details
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequestDTO'
+            examples:
+              ownAccountTransfer:
+                summary: Transfer between own accounts
+                value:
+                  transactionType: "TRANSFER_OWN_ACCOUNT"
+                  sourceAccountId: 1
+                  destinationAccountId: 2
+                  amount: 100.0
+              thirdPartyTransfer:
+                summary: Transfer to third-party account
+                value:
+                  transactionType: "TRANSFER_THIRD_PARTY_ACCOUNT"
+                  sourceAccountId: 1
+                  destinationAccountId: 3
+                  amount: 50.0
+      responses:
+        '201':
+          description: Transfer transaction registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionDTO'
+              examples:
+                successfulTransfer:
+                  summary: Successful transfer
+                  value:
+                    transactionId: "6971004f05c9a61e36766dfc"
+                    transactionType: "TRANSFER_OWN_ACCOUNT"
+                    accountId: 1
+                    relatedAccountId: 2
+                    amount: 100.0
+                    transactionStatus: "COMPLETED"
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomErrorResponse'
+              examples:
+                validationError:
+                  summary: Validation error
+                  value:
+                    timestamp: "2026-01-30T10:15:30"
+                    message: "Invalid transaction type"
+                    path: "/api/v1/transactions/transfer"
+                sameAccount:
+                  summary: Amount must be greater than zero
+                  value:
+                    timestamp: "2026-01-30T10:15:30"
+                    message: "Amount must be greater than zero"
+                    path: "/api/v1/transactions/transfer"
+        '404':
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomErrorResponse'
+              examples:
+                accountNotFound:
+                  summary: Account not found
+                  value:
+                    timestamp: "2026-01-30T10:15:30"
+                    message: "Source account not found for ID: 1"
+                    path: "/api/v1/transactions/transfer"
+        '422':
+          description: Transfer could not be processed due to an error in the process
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomErrorResponse'
+              examples:
+                insufficientFunds:
+                  summary: Transfer not registered internal error
+                  value:
+                    timestamp: "2026-01-30T10:15:30"
+                    message: "Internal error"
+                    path: "/api/v1/transactions/transfer"
+components:
+  schemas:
+    TransactionDTO:
+      type: object
+      description: Data Transfer Object representing a transaction
+      properties:
+        transactionId:
+          type: string
+          description: Unique identifier for the transaction (MongoDB ObjectId)
+          pattern: '^[a-f0-9]{24}$'
+          example: "6971004f05c9a61e36766dfa"
+        transactionType:
+          type: string
+          description: Type of the transaction
+          enum:
+            - TRANSFER_OWN_ACCOUNT
+            - TRANSFER_THIRD_PARTY_ACCOUNT
+          example: "TRANSFER_OWN_ACCOUNT"
+        accountId:
+          type: integer
+          format: int32
+          description: Primary account ID (source account for transfers)
+          example: 1
+        relatedAccountId:
+          type: integer
+          format: int32
+          description: Related account ID (destination account for transfers)
+          example: 2
+        amount:
+          type: number
+          format: double
+          description: Amount of the transaction
+          minimum: 0
+          example: 100.0
+        transactionStatus:
+          type: string
+          description: Current status of the transaction
+          enum:
+            - PENDING
+            - COMPLETED
+            - FAILED
+          example: "COMPLETED"
+    TransferRequestDTO:
+      type: object
+      description: DTO for transfer transaction requests
+      required:
+        - transactionType
+        - sourceAccountId
+        - destinationAccountId
+        - amount
+      properties:
+        transactionType:
+          type: string
+          description: Type of the transaction
+          pattern: 'TRANSFER_OWN_ACCOUNT|TRANSFER_THIRD_PARTY_ACCOUNT'
+          enum:
+            - TRANSFER_OWN_ACCOUNT
+            - TRANSFER_THIRD_PARTY_ACCOUNT
+          example: "TRANSFER_OWN_ACCOUNT"
+        sourceAccountId:
+          type: integer
+          format: int32
+          description: Unique identifier for the source account
+          minimum: 1
+          example: 1
+        destinationAccountId:
+          type: integer
+          format: int32
+          description: Unique identifier for the destination account
+          minimum: 1
+          example: 2
+        amount:
+          type: number
+          format: double
+          description: Amount to transfer
+          minimum: 0.01
+          example: 100.0
+    CustomErrorResponse:
+      type: object
+      description: Standard error response format
+      required:
+        - timestamp
+        - message
+        - path
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp when the error occurred
+          example: "2026-01-30T10:15:30"
+        message:
+          type: string
+          description: Detailed error message
+          example: "Transaction not found"
+        path:
+          type: string
+          description: Request path that caused the error
+          example: "/api/v1/transactions/6971004f05c9a61e36766dfa"

@@ -1,6 +1,7 @@
 package com.alessandragodoy.transactionms.configuration;
 
 import com.alessandragodoy.transactionms.model.Transaction;
+import com.alessandragodoy.transactionms.model.TransactionStatus;
 import com.alessandragodoy.transactionms.model.TransactionType;
 import com.alessandragodoy.transactionms.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +11,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
-import java.util.Date;
 import java.util.List;
 
 @Component
@@ -25,21 +25,36 @@ public class DataLoader implements CommandLineRunner {
 				.flatMapMany(count -> {
 					if (count == 0) {
 						LOGGER.info("No transactions found, creating initial transactions...");
-						String primaryAccount = "A00000000001";
-						String secondaryAccount = "A00000000002";
 						List<Transaction> initialTransactions = List.of(
-								Transaction.builder().id(null).primaryAccount(primaryAccount)
-										.transactionType(TransactionType.DEPOSIT).amount(100.0).date(new Date())
-										.originAccount("NE").destinationAccount(primaryAccount).build(),
-								Transaction.builder().id(null).primaryAccount(primaryAccount)
-										.transactionType(TransactionType.WITHDRAW).amount(100.0).date(new Date())
-										.originAccount(secondaryAccount).destinationAccount("NE").build(),
-								Transaction.builder().id(null).primaryAccount(secondaryAccount)
-										.transactionType(TransactionType.TRANSFER).amount(100.0).date(new Date())
-										.originAccount(primaryAccount).destinationAccount(secondaryAccount).build()
+								Transaction.builder()
+										.transactionId(null)
+										.transactionType(TransactionType.TRANSFER_OWN_ACCOUNT)
+										.accountId(1)
+										.relatedAccountId(2)
+										.amount(100.0)
+										.status(TransactionStatus.COMPLETED)
+										.build(),
+								Transaction.builder()
+										.transactionId(null)
+										.transactionType(
+												TransactionType.TRANSFER_THIRD_PARTY_ACCOUNT)
+										.accountId(3)
+										.relatedAccountId(4)
+										.amount(200.0)
+										.status(TransactionStatus.COMPLETED)
+										.build(),
+								Transaction.builder()
+										.transactionId(null)
+										.transactionType(TransactionType.TRANSFER_OWN_ACCOUNT)
+										.accountId(5)
+										.relatedAccountId(1)
+										.amount(300.0)
+										.status(TransactionStatus.FAILED)
+										.build()
 						);
 						return transactionRepository.saveAll(initialTransactions)
-								.doOnComplete(() -> LOGGER.info("Initial transactions added to the database."));
+								.doOnComplete(() -> LOGGER.info(
+										"Initial transactions added to the database."));
 					} else {
 						LOGGER.info("Transactions already exist, skipping initialization.");
 						return Flux.empty();

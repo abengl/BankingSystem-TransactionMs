@@ -1,66 +1,187 @@
-# Banking System - Transaction Microservice
+# Transaction Microservice - Banking System
 
-The Transaction microservice is part of a banking system designed to handle financial transactions, such as deposits, withdrawals, transfers, and historical data, associated with customer accounts. This microservice utilizes a reactive programming approach with Spring WebFlux, integrates with MongoDB for storage. API documentation is available via Swagger/OpenAPI, and a Postman collection is provided for testing, as well as, unit tests with JUnit, Mockito. Code coverage is tracked with JaCoCo and code validation with Checkstyle.
+A reactive microservice for managing financial transactions in a distributed banking system. Built with Spring WebFlux for non-blocking, high-throughput transaction processing with MongoDB for flexible data storage.
 
-## Table of Contents
-- [Technologies and Approaches](#technologies-and-approaches)
-- [UML Diagrams](#uml-diagrams)
-- [Postman](#postman)
-- [Swagger/OpenAPI Documentation](#swaggeropenapi-documentation)
-- [Code Quality and Coverage](#code-quality-and-coverage)
+## 🎯 Overview
 
-## Technologies and Approaches
+This microservice handles all transaction operations including transfer registration, transaction history, and real-time balance updates. Implements reactive programming patterns for scalability and integrates with the Account microservice for atomic transfer execution.
 
-- **Spring Boot with WebFlux**: Enables reactive and non-blocking programming to support high-throughput operations.
-- **MongoDB**: Serves as the database for storing transaction data in a flexible, document-oriented format.
-- **OpenAPI/Swagger**: Provides API documentation and supports easy testing of endpoints.
-- **Reactive Programming**: Ensures non-blocking I/O operations and scalability.
-- **Postman**: Used for testing endpoints via a pre-configured collection.
-- **JaCoCo-Checkstyle**: To verify code covergae and best practices in code style.
+## 🏗️ Architecture & Design
 
-## UML Diagrams
+### Key Features
+- **Reactive Architecture**: Built with Spring WebFlux for non-blocking, asynchronous operations
+- **Contract-First API Design**: OpenAPI 3.0 specifications with reactive patterns (Mono/Flux)
+- **Event-Driven Processing**: Reactive streams for high-throughput transaction handling
+- **NoSQL Persistence**: MongoDB for flexible, scalable transaction storage
+- **Microservice Orchestration**: Coordinates with Account service for transfer execution
+- **Real-time Processing**: Reactive chains for immediate transaction validation and processing
 
-The following UML diagrams detail the architecture and data flow of the Transaction Microservice:
+### Technology Stack
+- **Framework**: Spring Boot 3.5.7 with WebFlux
+- **Language**: Java 17
+- **Database**: MongoDB (Reactive Driver)
+- **Reactive Core**: Project Reactor (Mono/Flux)
+- **API Documentation**: OpenAPI 3.0 (Swagger UI for WebFlux)
+- **Testing**: JUnit 5, Mockito, Reactor Test
+- **Code Quality**: JaCoCo (70% coverage), Checkstyle
+- **Build Tool**: Maven
 
-- **Sequence Diagram**: Illustrates the flow of operations for making a deposit and withdrawal transactions and communicating with the [Account microservice](https://github.com/abengl/NTT-Project2-AccountMS).
+## 📋 API Endpoints
 
-  <img alt="UML Deposit sequence diagram" src="https://github.com/abengl/NTT-Project3-TransactionMs/blob/985c5b9c89b2abca16937ca82362dba15d26c955/src/main/resources/uml/Transaction_Microservice_Deposit_UML_Sequence_Diagram.png" width="500" height="500">
+### Transaction API (`/api/v1/transactions`)
+- `GET /` - Retrieve all transactions
+- `GET /{transactionId}` - Retrieve transaction by ID (MongoDB ObjectId)
+- `GET /account/{accountId}` - Get transaction history for an account
+- `POST /transfer` - Register and execute a transfer transaction
 
-  <img alt="UML Withdrawal sequence diagram" src="https://github.com/abengl/NTT-Project3-TransactionMs/blob/985c5b9c89b2abca16937ca82362dba15d26c955/src/main/resources/uml/Transaction_Microservice_Withdrawal_UML_Sequence_Diagram.png" width="500" height="500">
-  
-- **Component Diagram**: Represents the overall architecture of the Transaction Microservice and its interaction with MongoDB and other services.  
-<img alt="UML component diagram" src="https://github.com/abengl/NTT-Project3-TransactionMs/blob/985c5b9c89b2abca16937ca82362dba15d26c955/src/main/resources/uml/Transaction_Microservice_UML_Component_Diagram.png" width="800" height="400">
+## 🚀 Getting Started
 
-## Postman
+### Prerequisites
+- Java 17 or higher
+- Maven 3.8+
+- MongoDB 4.4+ (or MongoDB Atlas)
 
-A Postman collection is provided to test the Transaction microservice's endpoints. Follow these steps:
-1. **Import the Collection**: Download or clone the repository, then import the Postman collection file located in the `/postman` directory.
-2. **Import Environment Variables**: import the environment variables into Postman and set them to run with the test collection.
-3. **Run Tests**: Once configured, you can execute requests to test each endpoint. The collection provides requests for creating, retrieving, updating, and deleting customer records.
+### Local Setup
 
-## Swagger/OpenAPI Documentation
-
-The Swagger/OpenAPI documentation provides a detailed description of each endpoint, including parameters, request bodies, and response formats.
-
-1. Ensure the service is running locally (default: `http://localhost:8087`).
-2. Open a browser and navigate to: [http://localhost:8087/v1/swagger-ui.html](http://localhost:8087/v1/swagger-ui.html)
-
-## Code Quality and Coverage
-
-To maintain code quality and ensure adequate test coverage, the project uses **Checkstyle** for code analysis and **JaCoCo** for test coverage reports. Follow the steps below to run these tools:
-
-### Run Checkstyle
-1. Open a terminal and navigate to the project directory.
-2. Run the following command to perform a Checkstyle analysis:
+1. **Clone the repository**
    ```bash
-   mvn checkstyle:check
+   git clone https://github.com/abengl/BankingSystem-TransactionMs.git
+   cd transaction-ms
    ```
-3. Review the output in the terminal for any code style violations. The results will also be saved in the target/reports/checkstyle.html file.
+
+2. **Configure MongoDB**
+   ```properties
+   # application.properties
+   spring.data.mongodb.uri=mongodb://localhost:27017/transaction_db
+   # Or for MongoDB Atlas:
+   # spring.data.mongodb.uri=mongodb+srv://user:password@cluster.mongodb.net/transaction_db
    
-### Run JaCoCo for Test Coverage
-1. In the terminal, run the tests with coverage analysis:
-   ```bash
-   mvn clean test
+   # Account service URL for transfer execution
+   account.service.url=http://localhost:8086/api/v1/internal/accounts
    ```
-2. Open the generated report located at `target/site/jacoco/index.html` in your browser to review coverage details.
 
+3. **Build the project**
+   ```bash
+   mvn clean install
+   ```
+
+4. **Run the application**
+   ```bash
+   mvn spring-boot:run
+   ```
+
+The service will start on `http://localhost:8087`
+
+### API Documentation
+
+Access interactive API documentation at:
+- **Swagger UI**: [http://localhost:8087/swagger-ui.html](http://localhost:8087/swagger-ui.html)
+- **OpenAPI Spec**: [http://localhost:8087/v3/api-docs](http://localhost:8087/v3/api-docs)
+
+## 🧪 Testing
+
+### Run Unit Tests
+```bash
+mvn test
+```
+
+### Test Reactive Flows
+```bash
+mvn test -Dtest=TransactionServiceTest
+```
+
+### Generate Coverage Report
+```bash
+mvn clean test jacoco:report
+```
+View report at `target/site/jacoco/index.html`
+
+### Code Quality Check
+```bash
+mvn checkstyle:check
+```
+
+## 📂 Project Structure
+
+```
+transaction-ms/
+├── src/main/java/com/alessandragodoy/transactionms/
+│   ├── api/                    # Generated reactive API interface
+│   │   └── TransactionApi.java
+│   ├── controller/             # Reactive controller implementation
+│   │   └── TransactionController.java
+│   ├── service/               # Reactive business logic
+│   │   ├── TransactionService.java
+│   │   └── impl/
+│   │       └── TransactionServiceImpl.java
+│   ├── dto/                    # Data Transfer Objects
+│   ├── model/                 # MongoDB documents
+│   ├── repository/            # Reactive MongoDB repository
+│   ├── adapter/              # External service clients (WebClient)
+│   ├── exception/            # Custom exceptions
+│   └── utility/              # Helper classes
+├── src/main/resources/
+│   ├── openapi/              # API contract
+│   │   └── transaction-api.yml
+│   └── application.properties
+└── pom.xml
+```
+
+## 🔗 Integration
+
+### Microservice Communication
+
+This service integrates with:
+- **Account Microservice**: Executes balance transfers via reactive WebClient
+
+
+## 📊 Transaction Processing
+
+### Transaction Types
+- **TRANSFER_OWN_ACCOUNT**: Transfer between accounts owned by same customer
+- **TRANSFER_THIRD_PARTY_ACCOUNT**: Transfer to different customer's account
+
+### Transaction Status
+- **PENDING**: Transaction initiated but not completed
+- **COMPLETED**: Transfer successfully executed
+- **FAILED**: Transfer execution failed
+
+### Processing Flow
+1. **Validation**: Validate request parameters (amount > 0, accounts different)
+2. **Account Verification**: Verify both accounts exist and are active
+3. **Balance Check**: Confirm source account has sufficient funds
+4. **Transaction Record**: Save transaction to MongoDB with PENDING status
+5. **Transfer Execution**: Call Account service to update balances atomically
+6. **Status Update**: Update transaction status to COMPLETED or FAILED
+
+
+## 📊 Code Quality Metrics
+
+- **Test Coverage**: Minimum 70% line and instruction coverage
+- **Reactive Testing**: StepVerifier for Mono/Flux testing
+- **Code Style**: Google Java Style Guide compliance
+- **Excluded from Coverage**: Configuration, DTOs, generated code, exceptions
+
+## 🎓 Technical Highlights
+
+- **Reactive Programming**: Non-blocking I/O with Project Reactor (Mono/Flux)
+- **Contract-First Development**: OpenAPI 3.0 with reactive patterns
+- **NoSQL Database**: MongoDB for flexible, scalable storage
+- **WebClient Integration**: Reactive HTTP client for microservice communication
+- **Functional Composition**: Reactive chains for complex transaction flows
+- **Error Resilience**: Comprehensive error handling in reactive streams
+- **Type-Safe APIs**: Generated interfaces with reactive signatures
+- **Event-Driven**: Asynchronous processing for high throughput
+
+## 🔍 Reactive Advantages
+
+- **Scalability**: Handles thousands of concurrent transactions with minimal threads
+- **Responsiveness**: Non-blocking I/O ensures low latency
+- **Backpressure**: Reactive Streams protocol handles flow control
+- **Efficiency**: Thread utilization optimized for I/O-bound operations
+- **Resilience**: Built-in error handling and retry mechanisms
+
+## 📫 Contact
+
+**Alessandra Godoy**
+- Email: api@alessandragodoy.com

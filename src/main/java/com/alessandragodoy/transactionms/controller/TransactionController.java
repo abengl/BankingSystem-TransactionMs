@@ -1,71 +1,92 @@
 package com.alessandragodoy.transactionms.controller;
 
-import com.alessandragodoy.transactionms.controller.dto.DepositRequestDTO;
-import com.alessandragodoy.transactionms.controller.dto.TransactionDTO;
-import com.alessandragodoy.transactionms.controller.dto.TransferRequestDTO;
-import com.alessandragodoy.transactionms.controller.dto.WithdrawRequestDTO;
+import com.alessandragodoy.transactionms.api.TransactionApi;
+import com.alessandragodoy.transactionms.dto.TransactionDTO;
+import com.alessandragodoy.transactionms.dto.TransferRequestDTO;
 import com.alessandragodoy.transactionms.service.TransactionService;
-import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import static com.alessandragodoy.transactionms.utility.DTOMapper.convertToDTO;
 
 /**
  * Controller for handling transaction-related requests.
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/transactions")
-public class TransactionController {
+public class TransactionController implements TransactionApi {
 	private final TransactionService transactionService;
 
 	/**
-	 * Retrieves the transaction history.
+	 * Retrieves all transactions registered.
 	 *
-	 * @return a ResponseEntity containing a Flux of TransactionDTO
+	 * @param exchange the server web exchange
+	 * @return {@code ResponseEntity<Flux<TransactionDTO>>} a transactions list
 	 */
-	@Operation(summary = "Retrieve transactions history", description = "Returns the transaction history as a list of transactions.")
-	@GetMapping
-	public ResponseEntity<Flux<TransactionDTO>> getTransactionsHistorial() {
-		return ResponseEntity.ok(transactionService.listAllTransactions());
+	public Mono<ResponseEntity<Flux<TransactionDTO>>> getAllTransactions(
+			ServerWebExchange exchange) {
+
+		return transactionService.getAllTransactions()
+				.map(transaction -> convertToDTO(transaction, TransactionDTO.class))
+				.collectList()
+				.map(transactions -> ResponseEntity.ok(Flux.fromIterable(transactions)));
 	}
 
 	/**
-	 * Registers a deposit transaction.
+	 * Retrieves a transaction by its ID.
 	 *
-	 * @param depositRequest the deposit request data transfer object
-	 * @return a ResponseEntity containing a Mono of TransactionDTO
+	 * @param transactionId the unique identifier of the transaction
+	 * @param exchange      the server web exchange
+	 * @return {@code ResponseEntity<TransactionDTO>} the transaction details
 	 */
-	@Operation(summary = "Register a deposit transaction", description = "Returns the transaction details after registering a deposit.")
-	@PostMapping("/deposit")
-	public ResponseEntity<Mono<TransactionDTO>> registerDeposit(@RequestBody DepositRequestDTO depositRequest) {
-		return ResponseEntity.ok(transactionService.registerDeposit(depositRequest));
+	public Mono<ResponseEntity<TransactionDTO>> getTransactionById(
+			@PathVariable String transactionId, ServerWebExchange exchange) {
+
+		return transactionService.getTransactionById(transactionId)
+				.map(transaction -> ResponseEntity.ok(
+						convertToDTO(transaction, TransactionDTO.class)));
 	}
 
 	/**
-	 * Registers a withdrawal transaction.
+	 * Retrieves transactions by account ID.
 	 *
-	 * @param withdrawRequest the withdrawal request data transfer object
-	 * @return a ResponseEntity containing a Mono of TransactionDTO
+	 * @param accountId the unique identifier of the account
+	 * @param exchange  the server web exchange
+	 * @return {@code ResponseEntity<Flux<TransactionDTO>>} a list of transactions for the account
 	 */
-	@Operation(summary = "Register a withdrawal transaction", description = "Returns the transaction details after registering a withdrawal.")
-	@PostMapping("/withdraw")
-	public ResponseEntity<Mono<TransactionDTO>> registerWithdraw(@RequestBody WithdrawRequestDTO withdrawRequest) {
-		return ResponseEntity.ok(transactionService.registerWithdraw(withdrawRequest));
+	public Mono<ResponseEntity<Flux<TransactionDTO>>> getTransactionsByAccountId(
+			@PathVariable Integer accountId, ServerWebExchange exchange) {
+
+		return transactionService.getTransactionsByAccountId(accountId)
+				.map(transaction -> convertToDTO(transaction, TransactionDTO.class))
+				.collectList()
+				.map(transactions -> ResponseEntity.ok(Flux.fromIterable(transactions)));
 	}
 
 	/**
 	 * Registers a transfer transaction.
 	 *
-	 * @param transferRequest the transfer request data transfer object
-	 * @return a ResponseEntity containing a Mono of TransactionDTO
+	 * @param transferRequestDTO the transfer request data transfer object
+	 * @param exchange           the server web exchange
+	 * @return {@code ResponseEntity<TransactionDTO>} containing the TransactionDTO
 	 */
-	@Operation(summary = "Register a transfer transaction", description = "Returns the transaction details after registering a transfer.")
-	@PostMapping("/transfer")
-	public ResponseEntity<Mono<TransactionDTO>> registerTransfer(@RequestBody TransferRequestDTO transferRequest) {
-		return ResponseEntity.ok(transactionService.registerTransfer(transferRequest));
+	public Mono<ResponseEntity<TransactionDTO>> registerTransfer(
+			@Valid @RequestBody Mono<TransferRequestDTO> transferRequestDTO,
+			ServerWebExchange exchange) {
+
+		return transferRequestDTO
+				.flatMap(request -> transactionService.registerTransfer(request)
+						.map(transaction -> ResponseEntity
+								.status(HttpStatus.CREATED)
+								.body(convertToDTO(transaction, TransactionDTO.class))));
 	}
 
 }
