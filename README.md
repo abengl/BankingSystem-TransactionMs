@@ -53,8 +53,6 @@ This microservice handles all transaction operations including transfer registra
    ```properties
    # application.properties
    spring.data.mongodb.uri=mongodb://localhost:27017/transaction_db
-   # Or for MongoDB Atlas:
-   # spring.data.mongodb.uri=mongodb+srv://user:password@cluster.mongodb.net/transaction_db
    
    # Account service URL for transfer execution
    account.service.url=http://localhost:8086/api/v1/internal/accounts
