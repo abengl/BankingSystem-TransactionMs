@@ -22,6 +22,7 @@ public class DataLoader implements CommandLineRunner {
 	@Override
 	public void run(String... args) {
 		transactionRepository.count()
+				.doOnNext(count -> LOGGER.info("Current transaction count: {}", count))
 				.flatMapMany(count -> {
 					if (count == 0) {
 						LOGGER.info("No transactions found, creating initial transactions...");
