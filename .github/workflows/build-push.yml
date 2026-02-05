@@ -1,4 +1,4 @@
-name: Build and Push Customer MS
+name: Build and Push Transaction MS
 
 on:
   # Only trigger when code is pushed to main (i.e., when PR is merged)
