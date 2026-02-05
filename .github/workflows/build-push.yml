@@ -114,7 +114,7 @@ jobs:
             -H "Accept: application/vnd.github.v3+json" \
             -H "Authorization: token ${{ secrets.DEPLOYMENT_TRIGGER_TOKEN }}" \
             https://api.github.com/repos/${{ secrets.DEPLOYMENT_REPO }}/dispatches \
-            -d '{"event_type":"account-ms-updated"}'
+            -d '{"event_type":"transaction-ms-updated"}'
         continue-on-error: true
 
       # Step 9: Show summary
