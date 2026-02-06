@@ -177,17 +177,15 @@ paths:
         - Transaction
       summary: Register a transfer transaction
       description: |
-        Creates and processes a transfer transaction between two accounts.
-        
-        **Transaction Types**:
-        - TRANSFER_OWN_ACCOUNT: Transfer between accounts owned by the same customer
-        - TRANSFER_THIRD_PARTY_ACCOUNT: Transfer to an account owned by a different customer
-        
-        **Process**:
-        1. Validates source and destination accounts
-        2. Checks sufficient balance in source account
-        3. Executes the transfer via Account microservice
-        4. Records the transaction
+        Creates and processes a transfer transaction between two accounts.<br><br>
+        **Transaction Types**:<br>
+        - TRANSFER_OWN_ACCOUNT: Transfer between accounts owned by the same customer<br>
+        - TRANSFER_THIRD_PARTY_ACCOUNT: Transfer to an account owned by a different customer<br><br>
+        **Process**:<br>
+        1. Validates source and destination accounts with the **Account Microservice**<br>
+        2. Checks sufficient balance in source account<br>
+        3. Executes the transfer via **Account Microservice**<br>
+        4. Records the transaction<br>
       operationId: registerTransfer
       requestBody:
         required: true
