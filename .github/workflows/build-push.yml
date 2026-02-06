@@ -1,9 +1,9 @@
 name: Build and Push Transaction MS
 
 on:
-  # Only trigger when code is pushed to main (i.e., when PR is merged)
+  # Only trigger when code is pushed to main
   push:
-    branches: [ main, ms-transaction-deploy ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
